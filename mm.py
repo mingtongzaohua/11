@@ -1,9 +1,10 @@
 # coding=utf-8
 
 import requests
-import re
+import re#正则表达式
 import os
 import urllib.request
+import threading
 
 header = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 UBrowser/6.1.2107.204 Safari/537.36',
@@ -50,7 +51,8 @@ def getPicture(Url, path):
         if os.path.exists(file_path):      
             continue
         pic_link = "http://fm.shiyunjj.com/" + part1 + "/" + part2 + "/" + str(i+1) + ".jpg"
-        connectWeb(file_path,pic_link,part2,i,0.1)
+        # connectWeb(file_path,pic_link,part2,i,0.1)
+        myThread(i, file_path,pic_link,part2,i,0.1).start()
 
 def connectWeb(file_path,pic_link,part2,i,t):
     header = {
@@ -69,12 +71,25 @@ def connectWeb(file_path,pic_link,part2,i,t):
         tt=t+t
         return connectWeb(file_path,pic_link,part2,i,tt)
 
+class myThread (threading.Thread):
+    def __init__(self, threadID,file_path,pic_link,part2,i,t):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.file_path=file_path
+        self.pic_link=pic_link
+        self.part2 = part2
+        self.i = i
+        self.t=t
 
+    def run(self):
+        print ('Starting%d' %self.threadID)
+        connectWeb(self.file_path,self.pic_link,self.part2,self.i,self.t)
+        print ('Exiting%d'%self.threadID)
 
 
 _Url = "http://www.mmjpg.com/mm/"
 
-for i in range(1):
+for i in range(5):
     Url = _Url + str(i+1)
     path = str(i+1)
     getPicture(Url, path)
