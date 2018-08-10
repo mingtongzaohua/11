@@ -40,28 +40,41 @@ def getPicture(Url, path):
 
     for i in range(int(total[0][1])):
         file_path = "mm/picture/" + path
-
+        #if else 内容不可互换，记得为啥嘛？因为我理解错了
         if not os.path.exists(file_path):
             os.makedirs(file_path)
-
+        # else:
+        #     print(i)
+        #     continue
         file_path = file_path + "/" + str(i + 1) + ".jpg"
+        if os.path.exists(file_path):      
+            continue
         pic_link = "http://fm.shiyunjj.com/" + part1 + "/" + part2 + "/" + str(i+1) + ".jpg"
+        connectWeb(file_path,pic_link,part2,i,0.1)
 
-        header = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 UBrowser/6.1.2107.204 Safari/537.36',
-            'Referer': 'http://www.mmjpg.com/mm/' + part2 + '/1'
-        }
-        response = requests.get(pic_link, headers=header, timeout=0.1)
-
+def connectWeb(file_path,pic_link,part2,i,t):
+    header = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 UBrowser/6.1.2107.204 Safari/537.36',
+        'Referer': 'http://www.mmjpg.com/mm/' + part2 + '/1'
+    }
+    try:
+        response = requests.get(pic_link, headers=header, timeout=t)
         print('正在下载第%s张图片' % (i + 1))
         print(pic_link)
         save(file_path, response)
-        print('第%s张图片下载成功！' % (i+1))
+        print('第%s张图片下载成功！TimeOut=%f' % (i+1,t))
+    except Exception as e:
+        print("出现异常-->"+str(e))
+        # 不必循环，超时异常但是依然可以下载成功,why?
+        tt=t+t
+        return connectWeb(file_path,pic_link,part2,i,tt)
 
 
-Url = "http://www.mmjpg.com/mm/"
 
-for i in range(5):
-    Url = Url + str(i+1)
+
+_Url = "http://www.mmjpg.com/mm/"
+
+for i in range(1):
+    Url = _Url + str(i+1)
     path = str(i+1)
     getPicture(Url, path)
